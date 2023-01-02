@@ -1,0 +1,6 @@
+
+pandas
+geopandas
+
+# https://anitagraser.github.io/movingpandas/
+git+https://github.com/anitagraser/movingpandas
