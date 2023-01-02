@@ -3,6 +3,8 @@ from shapely.affinity import translate, rotate
 from typing import Union, Iterable
 from matplotlib.axes import Axes
 import geopandas as gpd
+from folium.folium import Map
+from folium import GeoJson
 
 class Robot:
     shape = None
@@ -87,3 +89,14 @@ class Robot:
             ax (Axes): Where to draw the robot.
         """
         me = gpd.GeoSeries(self.get()).plot(ax=ax, color=self.color)
+
+    def style_function(self, *args):
+        return {"fillColor": self.color}
+
+    def add_to(self, map: Map):
+        """Adds the robot to a map.
+
+        Args:
+            map (Map): _description_
+        """
+        GeoJson(gpd.GeoSeries(self.get()).to_json(), style_function = self.style_function).add_to(map)
