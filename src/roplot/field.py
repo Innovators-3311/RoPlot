@@ -3,17 +3,24 @@
 import numpy as np
 from itertools import product
 import geopandas as gpd
+from shapely import to_geojson
 from shapely.geometry import LineString, Polygon, Point, MultiPolygon, MultiLineString
 from typing import List, Callable
 from matplotlib.axes import Axes
 from folium.folium import Map
-from folium import GeoJson
+from folium import GeoJson, Icon, DivIcon, Marker, Circle
 
 def style_line_color(color:str) -> Callable:
     def sf(nonsense):
         return {"color": color}
     return sf
    
+def style_marker_color(color:str) -> Callable:
+    def sf(nonsense):
+        return {"markerColor": color}
+    return sf
+   
+
 
 OFFSETS = np.array([1,2,3,4,5]) * 24
 
@@ -26,10 +33,13 @@ class JunctionsPowerPlay:
     medium = [ Point(i,j) for i,j in product(OFFSETS[[1,3]], OFFSETS[[1, 3]])]
     high = [ Point(OFFSETS[1], OFFSETS[2]), Point(OFFSETS[2], OFFSETS[1]),
              Point(OFFSETS[2], OFFSETS[3]), Point(OFFSETS[3], OFFSETS[2]) ]
-    COLORSET = [("ground", "#111"), 
-                ("high", "#FFF44F"),
-                ("medium", "#FFDF00"),
-                ("low", "#FFA700")]
+    COLORSET = [("ground", "#000"), 
+                ("high", "#FF8"),
+                ("medium", "#FD4"),
+                ("low", "#FB0")]
+    STYLE_SET = {
+
+    }
 
     @classmethod
     def all(cls) -> List[Point]:
@@ -48,7 +58,20 @@ class JunctionsPowerPlay:
         for junction, color in cls.COLORSET:
             s = gpd.GeoSeries(getattr(cls, junction))
             s.plot(ax=ax, color=color)
+    
+    @classmethod
+    def add_to(cls, map: Map) -> None:
+        """Add the junctions to a specified map object
 
+        Args:
+            map (Map): _description_
+        """
+        for junction_type, color in cls.COLORSET:
+            for junction in getattr(cls, junction_type):
+                Circle([junction.x, junction.y], 
+                        radius=2, fillColor=color, fillOpacity=1.0,
+                        weight=1, color="black", #Dark stroke
+                        popup=junction_type,).add_to(map)            
     
 class FieldLines:
     _lines = gpd.GeoDataFrame([])
@@ -159,6 +182,10 @@ class FieldPowerPlay(Field):
     junctions = JunctionsPowerPlay()
     field_lines = FieldLinesPowerPlay()
 
+    def style_function(self, junk) -> dict: 
+        return {"lineColor": "black", 
+                "color": self.FIELD_COLOR}
+
     def draw_on_axes(self, ax: Axes):
         """Draws the field on the given axes
 
@@ -169,8 +196,11 @@ class FieldPowerPlay(Field):
         self.field_lines.draw_on_axes(ax)
         self.junctions.draw_on_axis(ax)
 
-    def add_to(self, map: Map): 
-        GeoJson(gpd.GeoSeries(self.border).to_json()).add_to(map)
+    def add_to(self, map: Map, show_junctions=True): 
+        GeoJson(to_geojson(self.border), 
+                style_function=style_line_color("black")).add_to(map)
+        if show_junctions:
+            self.junctions.add_to(map)
         self.field_lines.add_to(map)
 
 

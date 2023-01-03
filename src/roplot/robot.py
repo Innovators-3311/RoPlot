@@ -1,4 +1,4 @@
-from shapely import Geometry, Polygon, Point
+from shapely import Geometry, Polygon, Point, GeometryCollection, to_geojson
 from shapely.affinity import translate, rotate
 from typing import Union, Iterable
 from matplotlib.axes import Axes
@@ -9,8 +9,9 @@ from folium import GeoJson
 class Robot:
     shape = None
     _position = Point(0,0)
+    _front = Point(0,0)
     rotation = 0
-    color="pink"
+    color="#F22"
 
     def __init__(self, shape: Union[list, tuple, Geometry] ):
         """Create a robot object
@@ -37,7 +38,6 @@ class Robot:
     position = property(get_position, set_position)
 
 
-
     @staticmethod
     def make_rectangle(x: float, y: float):
         """Compute a Shape from the dimensions
@@ -50,7 +50,7 @@ class Robot:
 
         # Make a polygon, then center it cuz I'm too lazy to deal with all the
         # -1/2*x's and we only do this once
-        shape = Polygon([(0,0), (x, 0), (x, y), (0, y), (0,0)])
+        shape = Polygon([(0,0), (x, 0), (x,y/2), (x/2, y/2), (x,y/2), (x, y), (0, y), (0,0)])
         c = shape.centroid 
         return translate(shape, -c.x, -c.y)
     
@@ -90,8 +90,11 @@ class Robot:
         """
         me = gpd.GeoSeries(self.get()).plot(ax=ax, color=self.color)
 
-    def style_function(self, *args):
-        return {"fillColor": self.color}
+    def style_function(self, v) -> dict:
+        return {"fillColor": self.color, 
+                "weight": 2.0,
+                "fillOpacity": 0.5}
+
 
     def add_to(self, map: Map):
         """Adds the robot to a map.
@@ -99,4 +102,9 @@ class Robot:
         Args:
             map (Map): _description_
         """
-        GeoJson(gpd.GeoSeries(self.get()).to_json(), style_function = self.style_function).add_to(map)
+        GeoJson(to_geojson(self.get()), 
+                style_function=self.style_function,
+                ).add_to(map, name="robot")
+
+# TimestampedGeoJson is a plugin that might become really useful.
+# https://python-visualization.github.io/folium/plugins.html?highlight=animation#:~:text=class%20folium.plugins.TimestampedGeoJson

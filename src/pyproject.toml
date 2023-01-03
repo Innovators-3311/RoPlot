@@ -1,0 +1,26 @@
+[project]
+name = "roplot"
+version = "0.1.0"
+authors = [
+    { name = "Carl Fischer IV", email = "Carl.Fischer.IV@gmail.com", status="mentor" },
+]
+description = """A tool for logging location and plotting robot movements on a field.
+
+Designed for FIRST Tech Challenge robots using field localization algorithms, but may
+work for others.
+"""
+readme = "README.md"
+requires-python = ">=3.5"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Innovators-3311/RoPlot"
+"Issues" = "https://github.com/Innovators-3311/RoPlot/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
