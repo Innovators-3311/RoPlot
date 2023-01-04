@@ -5,15 +5,17 @@ from matplotlib.axes import Axes
 import geopandas as gpd
 from folium.folium import Map
 from folium import GeoJson
+from json import loads
 
-class Robot:
+class Robot(GeoJson):
     shape = None
     _position = Point(0,0)
     _front = Point(0,0)
+    _name = "Robot"
     rotation = 0
     color="#F22"
 
-    def __init__(self, shape: Union[list, tuple, Geometry] ):
+    def __init__(self, shape: Union[list, tuple, Geometry], *args, **kwargs):
         """Create a robot object
 
         Args:
@@ -21,11 +23,16 @@ class Robot:
 
         **Note:** Shape MIGHT be able to support multiple shapes as a list.
         """
+
         if isinstance(shape, Geometry):
             self.shape = shape
         else:
             self.shape = self.make_rectangle(*shape)
 
+        super().__init__('[{ "trick__init__": "yes" }]', *args, 
+                         style_function=self.style_function, **kwargs)
+        self.embed = True
+    
     def get_position(self):
         return self._position 
 
@@ -81,7 +88,22 @@ class Robot:
         """Gets the robot polygon
         """
         return self.at_location(self._position.x, self._position.y, self.rotation)
+
+    def get_data(self) -> dict:
+        # print("Someone read data.", to_geojson(self.get()))
+        return {'type': 'FeatureCollection',
+                'features': [
+                    {'id': self.get_name(), 'type': 'Feature', 'geometry': loads(to_geojson(self.get()))}
+                    ]
+        }   
     
+    def set_data(self, value):
+        # __init__ tries to set this.  Ignore it.  
+        # print(f"Someone tried to set data to {value}.")
+        return
+
+    data = property(get_data, set_data)
+
     def draw_on_axes(self, ax: Axes):
         """Draw the robot on a given axes
 
@@ -95,16 +117,6 @@ class Robot:
                 "weight": 2.0,
                 "fillOpacity": 0.5}
 
-
-    def add_to(self, map: Map):
-        """Adds the robot to a map.
-
-        Args:
-            map (Map): _description_
-        """
-        GeoJson(to_geojson(self.get()), 
-                style_function=self.style_function,
-                ).add_to(map, name="robot")
 
 # TimestampedGeoJson is a plugin that might become really useful.
 # https://python-visualization.github.io/folium/plugins.html?highlight=animation#:~:text=class%20folium.plugins.TimestampedGeoJson
