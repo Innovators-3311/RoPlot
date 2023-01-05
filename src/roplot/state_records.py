@@ -18,9 +18,9 @@ class StateRecord(Base):
     def __init__(self, record):
         self.record = record
         self.timestamp = datetime.now()
-        self.runtime = record.get(RUNTIME_FIELD)
+        self.runtime = float(record.get(RUNTIME_FIELD))
 
     def __repr__(self):
-        return f"<StateRecord at {self.timstamp.isoformat()}>"
+        return f"<StateRecord at {self.timestamp.isoformat()}>"
 
 

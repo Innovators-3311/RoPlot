@@ -2,5 +2,9 @@
 pandas
 geopandas
 
+flask
+sqlalchemy
+flask-apscheduler
+
 # https://anitagraser.github.io/movingpandas/
 git+https://github.com/anitagraser/movingpandas
