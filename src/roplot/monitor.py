@@ -18,7 +18,7 @@ DEFAULT_PATH=""
 URL_STRING = r"http://{host}:{port}/{path}"
 RUNTIME_FIELD = "runtime"
 
-DEFAULT_WAIT=1
+DEFAULT_WAIT=0.25
 
 REQUEST_TIMEOUT=0.2
 
@@ -57,7 +57,8 @@ def monitor_robot(**kwargs):
         with session.begin():
             all_states = [ StateRecord(state) for state in state_log]
             session.add_all(all_states)
-            last_state = state_log[-1]
+            if len(state_log)>0:
+                last_state = state_log[-1]
         info(f"Saved {len(all_states)} states")
 
 def parse_args():

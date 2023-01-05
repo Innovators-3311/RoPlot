@@ -26,7 +26,7 @@ class StateSim():
     x = INIT_X
     y = INIT_Y
     hdg = INIT_H
-    vx = 1
+    vx = 3
     vy = 0
     vhdg = 10
     last_runtime = 0.0

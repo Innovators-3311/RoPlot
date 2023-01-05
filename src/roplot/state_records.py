@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Float, JSON
 
 from datetime import datetime
 
-RUNTIME_FIELD="runtime"
+RUNTIME_FIELD="runTime"
 
 Base = declarative_base()
 

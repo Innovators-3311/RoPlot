@@ -21,7 +21,17 @@
             "cwd": "${workspaceFolder}/src/",
             "args": ["--host", "localhost", "--port", "5000"],
             "justMyCode": true
+        },
+        {
+            "name": "Python: Fake State Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/roplot/fake_state_server.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src/",
+            "justMyCode": true
         }
+
 
     ]
 }
