@@ -37,6 +37,8 @@ class StateSim():
         self.start_time = datetime.now()
 
     def reset_match(self):
+        """Reset the simulation back to the start of a match.
+        """
         self.x = INIT_X
         self.y = INIT_Y
         self.hdg = INIT_H 
@@ -48,10 +50,17 @@ class StateSim():
         self.reset_log()
 
     @property
-    def runtime(self):
+    def runtime(self) -> float:
+        """compute runtime
+
+        Returns:
+            float: total seconds since start of match
+        """
         return (datetime.now() - self.start_time).total_seconds()
 
     def add_record(self):
+        """Add a log record to the list.
+        """
         self.update_state()
         self.state_log.append({
             "runTime": self.runtime,
@@ -71,6 +80,8 @@ class StateSim():
             self.state_log = self.state_log[-self.maxlen:]
         
     def update_state(self):
+        """Update the simulation state
+        """
         runtime = self.runtime
         dt = (runtime - self.last_runtime)
         self.hdg += self.vhdg * dt
@@ -81,6 +92,8 @@ class StateSim():
         self.last_runtime = self.runtime
 
     def reset_log(self):
+        """Clear the log
+        """
         self.state_log = []
 
     def run_forever(self):
