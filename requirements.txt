@@ -6,5 +6,7 @@ flask
 sqlalchemy
 flask-apscheduler
 
+Shapely==2.0.0
+
 # https://anitagraser.github.io/movingpandas/
 git+https://github.com/anitagraser/movingpandas
