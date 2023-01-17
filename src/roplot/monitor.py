@@ -1,8 +1,9 @@
 from requests import session
 from datetime import datetime
 from time import sleep
-from state_records import StateRecord, Base
+from state_records import StateRecord, Base, FieldPowerPlay, Robot
 from logging import info, INFO, basicConfig
+from folium import Map
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -60,6 +61,36 @@ def monitor_robot(**kwargs):
             if len(state_log)>0:
                 last_state = state_log[-1]
         info(f"Saved {len(all_states)} states")
+
+# TODO: Find docs on how to make a lightweight http response. handle_get returns a field as html.
+class StateRepeater:
+
+    def __init__(self, session: Session):
+        """Create a StateRepeater class. This is a lightweight http server that renders the field and the robot.
+
+        Args:
+            session (Session): a sqlalchemy session to grab state from.
+        """
+        self.session = session
+        self.fpp = FieldPowerPlay()
+        crs = "Simple"
+        # Define our field_map.
+        self.field_map = Map(location=[72, 72], zoom_start=2, min_zoom=1, max_zoom=4, tiles=None, crs=crs)
+        self.fpp.add_to(self.field_map, show_junctions=True)
+        self.robot = Robot((17, 16))
+        self.field_map.add_child(self.robot)
+
+    def update_robot(self):
+        """Updated the robot location from the latest state
+        """
+        state = StateRecord.get_latest(s, type="CombinedLocalizer")
+        # TODO: Check the age of the latest state. Warn if it's old.
+        self.robot.position = (state.record['x'], state.record['y'])
+        self.robot.heading = state.record['heading']
+
+    def handle_get(self, path):
+        self.update_robot()
+        return self.field_map.render()
 
 def parse_args():
     from argparse import ArgumentParser

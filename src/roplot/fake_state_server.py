@@ -63,6 +63,7 @@ class StateSim():
         """
         self.update_state()
         self.state_log.append({
+            "type": "CombinedLocalizer",
             "runTime": self.runtime,
             "x": self.x,
             "y": self.y,

@@ -13,7 +13,17 @@
             "justMyCode": true
         },
         {
-            "name": "Python: Monitor Robot",
+            "name": "Python: Monitor Real Robot",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/roplot/monitor.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src/",
+            // "args": ["--host", "localhost", "--port", "5000"],
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Monitor Fake Robot",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/roplot/monitor.py",
