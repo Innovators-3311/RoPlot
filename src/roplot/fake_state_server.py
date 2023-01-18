@@ -119,4 +119,4 @@ if __name__ == '__main__':
     scheduler.add_job(id='add-record', func=state_log.add_record, trigger='interval', seconds=0.1)
     scheduler.add_job(id='reset-match', func=state_log.reset_match, trigger='interval', seconds=300)
 
-    app.run()
+    app.run(port=8079)

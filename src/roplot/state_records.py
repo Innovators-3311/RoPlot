@@ -1,6 +1,6 @@
 from roplot import FieldPowerPlay, Robot
+from .database import Base
 
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, JSON, desc
 from sqlalchemy.orm import Session
 
@@ -8,7 +8,6 @@ from datetime import datetime
 
 RUNTIME_FIELD="runTime"
 
-Base = declarative_base()
 
 class StateRecord(Base):
     __tablename__ = "StateRecords"
@@ -39,7 +38,6 @@ class StateRecord(Base):
         Returns:
             StateRecord: the latest StateRecord object in that database. 
         """
-        print("session: ", dir(session))
         return session.query(StateRecord).filter_by(**kwargs).order_by(desc( StateRecord.id )).limit(1).first()
 
 

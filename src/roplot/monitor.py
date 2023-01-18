@@ -2,6 +2,7 @@ from requests import session
 from datetime import datetime
 from time import sleep
 from .state_records import StateRecord, Base, FieldPowerPlay, Robot
+from .database import SessionLocal, ENGINE
 from logging import info, INFO, basicConfig
 from folium import Map
 
@@ -10,10 +11,7 @@ from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-DATA_PATH='data'
-TODAY = datetime.now().strftime("%Y-%m-%d")
-ENGINE = create_engine(f"sqlite:///{DATA_PATH}/{TODAY}.sqlite")
-sas = Session(ENGINE)
+sas = SessionLocal()
 
 DEFAULT_HOST=r"192.168.43.1"
 DEFAULT_PORT="8079"
@@ -52,7 +50,7 @@ class StateClient:
 def monitor_robot(**kwargs):
     scargs = {k:v for k,v in kwargs.items() if k in ('host', 'port', 'path', 'timeout')}
     sc = StateClient(**scargs)
-    with Session(ENGINE) as session:
+    with sas as session:
         try:
             state_log = sc.get_state()
         except Exception as e:
@@ -95,7 +93,9 @@ class StateRepeater:
 
     def handle_get(self):
         self.update_robot()
-        return self.field_map.render()
+        html = self.field_map.get_root().render()
+        return html
+
 
 def parse_args():
     from argparse import ArgumentParser
@@ -110,22 +110,29 @@ def parse_args():
 
     return parser.parse_args()
 
-def entrypoint():
+def entrypoint(scheduler):
     """An entrypoint for installers.
     """
     args = parse_args()
     wait = args.wait
     Base.metadata.create_all(ENGINE)
     kwargs = vars(args)
-    while True:
-        monitor_robot(**kwargs)
-        sleep(wait)
+    scheduler.add_job(id='monitor-robot', func=monitor_robot, kwargs=kwargs, trigger='interval', seconds=wait)
 
-print(dir(sas))
 sr = StateRepeater(sas)
 @app.route("/map")
 def handle_get():
     return sr.handle_get()
 
-if __name__ == "__main__":
-    entrypoint()
+# if __name__ == "__main__":
+#     entrypoint()
+
+if __name__ == '__main__':
+    from flask_apscheduler import APScheduler
+
+    scheduler = APScheduler()
+    scheduler.init_app(app)
+    scheduler.start()
+    entrypoint(scheduler)
+
+    app.run(port=5000)
