@@ -1,9 +1,11 @@
 from requests import session
 from datetime import datetime
 from time import sleep
-from state_records import StateRecord, Base, FieldPowerPlay, Robot
+from .state_records import StateRecord, Base, FieldPowerPlay, Robot
 from logging import info, INFO, basicConfig
 from folium import Map
+
+from flask import Flask
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -11,6 +13,7 @@ from sqlalchemy.orm import Session
 DATA_PATH='data'
 TODAY = datetime.now().strftime("%Y-%m-%d")
 ENGINE = create_engine(f"sqlite:///{DATA_PATH}/{TODAY}.sqlite")
+sas = Session(ENGINE)
 
 DEFAULT_HOST=r"192.168.43.1"
 DEFAULT_PORT="8079"
@@ -24,6 +27,8 @@ DEFAULT_WAIT=0.25
 REQUEST_TIMEOUT=0.2
 
 basicConfig(level=INFO)
+
+app = Flask(__name__)
 
 # This session has a short timeout. The robot is close and fast.
 s = session()
@@ -83,12 +88,12 @@ class StateRepeater:
     def update_robot(self):
         """Updated the robot location from the latest state
         """
-        state = StateRecord.get_latest(s, type="CombinedLocalizer")
+        state = StateRecord.get_latest(self.session, type="CombinedLocalizer")
         # TODO: Check the age of the latest state. Warn if it's old.
         self.robot.position = (state.record['x'], state.record['y'])
         self.robot.heading = state.record['heading']
 
-    def handle_get(self, path):
+    def handle_get(self):
         self.update_robot()
         return self.field_map.render()
 
@@ -116,6 +121,11 @@ def entrypoint():
         monitor_robot(**kwargs)
         sleep(wait)
 
+print(dir(sas))
+sr = StateRepeater(sas)
+@app.route("/map")
+def handle_get():
+    return sr.handle_get()
 
 if __name__ == "__main__":
     entrypoint()

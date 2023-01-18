@@ -1,7 +1,8 @@
-from roplot import FieldPowerPlay, Robot, StateRecord
+from roplot import FieldPowerPlay, Robot
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, JSON, desc
+from sqlalchemy.orm import Session
 
 from datetime import datetime
 
@@ -26,7 +27,7 @@ class StateRecord(Base):
         return f"<StateRecord at {self.timestamp.isoformat()}>"
 
     @classmethod
-    def get_latest(cls, session, **kwargs) -> Base:
+    def get_latest(cls, session: Session, **kwargs) -> Base:
         """Get the latest instance of state from the database.
 
         Args:
@@ -36,6 +37,7 @@ class StateRecord(Base):
         Returns:
             StateRecord: the latest StateRecord object in that database. 
         """
+        print("session: ", dir(session))
         return session.query(StateRecord).filter_by(**kwargs).order_by(desc( StateRecord.id )).limit(1).first()
 
 
