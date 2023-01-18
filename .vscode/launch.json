@@ -23,7 +23,6 @@
             "justMyCode": true
         },
         {
-            "name": "Python: Monitor Fake Robot",
             "name": "Python: Monitor Real Robot",
             "type": "python",
             "request": "launch",
